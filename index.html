@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Potato Disease Classifier</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 400px;
+      max-width: 100%;
+    }
+    input[type="file"] {
+      margin: 15px 0;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    img {
+      margin-top: 15px;
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #27ae60;
+    }
+  </style>
+</head>
+<body>
+  <h1>🥔 Potato Disease Classifier</h1>
+  <div class="card">
+    <input type="file" id="fileInput" accept="image/*">
+    <br>
+    <button onclick="uploadImage()">Upload & Predict</button>
+    
+    <div id="preview"></div>
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    async function uploadImage() {
+      const fileInput = document.getElementById("fileInput");
+      const resultDiv = document.getElementById("result");
+      const previewDiv = document.getElementById("preview");
+
+      if (fileInput.files.length === 0) {
+        alert("Please select an image!");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Show preview
+      previewDiv.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="preview" width="250">`;
+
+      resultDiv.innerHTML = "⏳ Predicting...";
+
+      try {
+        const response = await fetch("http://localhost:8000/predict", {
+          method: "POST",
+          body: formData
+        });
+        const data = await response.json();
+
+        resultDiv.innerHTML = `🌱 <strong>${data.class}</strong> <br> Confidence: ${(data.confidence * 100).toFixed(2)}%`;
+      } catch (error) {
+        console.error("Error:", error);
+        resultDiv.innerHTML = "❌ Error making prediction!";
+      }
+    }
+  </script>
+</body>
+</html>
